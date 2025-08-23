@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: stg_red_sox_players
+    description: >
+      Staging model for historical Red Sox player data. Includes metadata, performance stats,
+      and positional flags. Source data spans early 20th century to modern era, with quirks
+      like inconsistent height formats and missing WAR values. This model standardizes naming
+      and prepares for downstream analysis.
+
+    columns:
+      - name: player_id
+        description: >
+          Sequential ID assigned via row_number() over season and name.
+          Not persistent across runs—used for internal joins and ordering only.
+        tests:
+          - not_null
+          - unique
+
+      - name: season
+        description: "Year of the MLB season (e.g., 1908). Used for temporal analysis and career tracking."
+        tests:
+          - not_null
+
+      - name: name
+        description: "Player's full name. May include middle initials or suffixes. Not guaranteed to be unique."
+        tests:
+          - not_null
+
+      - name: age
+        description: "Player's age during the season. Derived from DoB and season year. May be inconsistent for early records."
+
+      - name: born
+        description: >
+          Country of birth. Typically 'US' or international codes. May be blank or inconsistent.
+          Consider normalizing to ISO country codes if used for geo analysis.
+
+      - name: flag
+        description: >
+          Unknown field—possibly a legacy marker or nationality flag. Often blank. Retained for completeness.
+
+      - name: bats
+        description: "Batting handedness: R (right), L (left), or S (switch)."
+
+      - name: throws
+        description: "Throwing handedness: R or L. Useful for pitcher splits and defensive analysis."
+
+      - name: height
+        description: >
+          Player height in feet and inches (e.g., '6\' 0\"'). Stored as string. Consider parsing to inches for numeric analysis.
+
+      - name: weight
+        description: "Player weight in pounds. May be outdated or estimated for historical players."
+
+      - name: dob
+        description: "Date of birth. Stored as string (e.g., 'Jan 28, 1882'). Consider parsing to date format."
+
+      - name: career_stage
+        description: >
+          Career stage marker (e.g., '1st', '2nd'). Not standardized. Could be used to flag rookies or veterans.
+
+      - name: games_played
+        description: "Total games played in the season. May include pinch appearances."
+
+      - name: games_started
+        description: "Games started. Useful for distinguishing starters vs bench players."
+
+      - name: war
+        description: >
+          Wins Above Replacement. Core sabermetric stat. May be null or missing for early seasons.
+          Negative values indicate below-replacement performance.
+
+      - name: all_star
+        description: "Whether the player was selected as an All-Star. Values: 'Yes', 'No', or blank."
+
+      - name: hof
+        description: "Hall of Fame status. Values: 'Yes', 'No'. May not reflect recent inductees."
